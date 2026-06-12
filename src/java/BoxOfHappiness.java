@@ -17,8 +17,8 @@ public class BoxOfHappiness{
         "The air is ionizing, the atmosphere is warming, and sun-baked crispy human skin is a delicacy YOU should try!",
         "The sun is out, \n the sky is blue, \n I hope the heat \n will mummify you."
         };
-        String[] sunny2 = {""};
-        String[] sunny3 = {""};
+        String[] sunny2 = {"","","","","","",""};
+        String[] sunny3 = {"","","","","","",""}};
 
         HashMap<Integer,String[]> sunny = new HashMap<>();
         sunny.put(0,sunny0);

@@ -2,7 +2,6 @@ package watt;
 import java.util.*;
 import java.io.*;
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import java.net.URI;
 import java.net.http.*;
@@ -13,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import com.google.gson.*;
-import java.time.*;
 public class WATT{
     public static void main(String[] args) throws Exception{
         //Make WATT window
@@ -42,7 +40,8 @@ public class WATT{
         //Add forecast
         watt.add(left,BorderLayout.WEST);
         JPanel right = new JPanel();
-        int[] jeremy = getForecast(0, 0);
+        double[] coordinates = getLocation();
+        int[] jeremy = getForecast(coordinates[0], coordinates[1]);
 
         DefaultListModel<String> model = new DefaultListModel<>();
         JList<String> forecast = new JList<>(model);
@@ -53,7 +52,8 @@ public class WATT{
         watt.add(right,BorderLayout.EAST);
         JButton refresh_button = new JButton("refresh");
         ZonedDateTime dateandtime = ZonedDateTime.now();
-        JLabel now = new JLabel("Today is "+dateandtime.format(DateTimeFormatter.ofPattern("M/d/uuuu"))+", and we currently have "+codetoweather(getCurrentWeather(0,0))+".");
+
+        JLabel now = new JLabel("Today is "+dateandtime.format(DateTimeFormatter.ofPattern("M/d/uuuu"))+", and we currently have "+codetoweather(getCurrentWeather(coordinates[0], coordinates[1]))+".");
         right.add(refresh_button, BorderLayout.SOUTH);
         right.add(now, BorderLayout.NORTH);
         watt.setVisible(true);
@@ -62,13 +62,17 @@ public class WATT{
             public void actionPerformed(ActionEvent e){
                 try{
                     ZonedDateTime dateandtime = ZonedDateTime.now();
-                    now.setText("Today is "+dateandtime.format(DateTimeFormatter.ofPattern("M/d/uuuu"))+", and we currently have "+codetoweather(getCurrentWeather(0,0))+".");
-
-                    watt.revalidate();
+                    double[] coordinates = getLocation();
+                    now.setText("Today is "+dateandtime.format(DateTimeFormatter.ofPattern("M/d/uuuu"))+", and we currently have "+codetoweather(getCurrentWeather(coordinates[0], coordinates[1]))+".");
+                    model.clear();
+                    int[] jeremy = getForecast(coordinates[0], coordinates[1]);
+                    for(int i=0; i<jeremy.length; i++){
+                        model.addElement(codetoweather(jeremy[i]));
+                    }
                 } catch(Exception a){
                     now.setText("Error: "+a);
-                    watt.revalidate();
                 }
+                watt.revalidate();
             }
         }); 
     } 
@@ -103,11 +107,35 @@ public class WATT{
             case 1: return "mainly clear skies";
             case 2: return "partly cloudy skies";
             case 3: return "overcast skies";
-            case 45: 
+            case 45: return "fog";
             case 48: return "fog";
             case 51: return "light drizzle";
+            case 52: return "moderate drizzle";
+            case 53: return "intense drizzle";
+            case 56: return "light freezing drizzle";
+            case 57: return "intense freezing drizzle";
+            case 61: return "slight rain";
+            case 62: return "moderate rain";
+            case 63: return "heavy rain";
+            case 66: return "light freezing rain";
+            case 67: return "heavy freezing rain";
+            case 71: return "slight snow fall";
+            case 72: return "moderate snow fall";
+            case 73: return "heavy snow fall";
+            case 77: return "snow grains";
+            case 80: return "slight rain showers";
+            case 81: return "moderate rain showers";
+            case 82: return "violent rain showers";
+            case 85: return "slight snow showers";
+            case 86: return "heavy snow showers";
+            case 95: return "thunderstorm";
+            case 96: return "thunderstorm with light hail";
+            case 99: return "thunderstorm with heavy hail";
             default: return "Error";
         }
  
+    }
+    public static double[] getLocation(){
+        return Locater.find();
     }
 }

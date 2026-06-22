@@ -2,11 +2,16 @@ package watt;
 import java.util.*;
 import java.io.*;
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import java.net.URI;
 import java.net.http.*;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import com.google.gson.*;
 import java.time.*;
 public class WATT{
@@ -29,23 +34,43 @@ public class WATT{
         label.setHorizontalAlignment(JLabel.CENTER); 
         topLeft.add(text,BorderLayout.NORTH);
         topLeft.add(label,BorderLayout.SOUTH);
-        topLeft.setSize(200,200);
         topLeft.setBorder(new LineBorder(Color.BLACK, 1, true));
         topLeft.setOpaque(true); 
         topLeft.setBackground(Color.CYAN); 
         left.add(topLeft, BorderLayout.NORTH);
         
         //Add forecast
-        ZonedDateTime dateandtime = ZonedDateTime.now();
-
-        JLabel now = new JLabel("Today is "+dateandtime+", and the weather is currently "+getCurrentWeather(0,0)+".");
-        
-        JPanel right = new JPanel();
-        right.add(now, BorderLayout.NORTH);
-
-        watt.add(right,BorderLayout.EAST);
         watt.add(left,BorderLayout.WEST);
+        JPanel right = new JPanel();
+        int[] jeremy = getForecast(0, 0);
+
+        DefaultListModel<String> model = new DefaultListModel<>();
+        JList<String> forecast = new JList<>(model);
+        for(int i=0; i<jeremy.length; i++){
+            model.addElement(codetoweather(jeremy[i]));
+        }
+        right.add(forecast,BorderLayout.SOUTH);
+        watt.add(right,BorderLayout.EAST);
+        JButton refresh_button = new JButton("refresh");
+        ZonedDateTime dateandtime = ZonedDateTime.now();
+        JLabel now = new JLabel("Today is "+dateandtime.format(DateTimeFormatter.ofPattern("M/d/uuuu"))+", and we currently have "+codetoweather(getCurrentWeather(0,0))+".");
+        right.add(refresh_button, BorderLayout.SOUTH);
+        right.add(now, BorderLayout.NORTH);
         watt.setVisible(true);
+        
+        refresh_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e){
+                try{
+                    ZonedDateTime dateandtime = ZonedDateTime.now();
+                    now.setText("Today is "+dateandtime.format(DateTimeFormatter.ofPattern("M/d/uuuu"))+", and we currently have "+codetoweather(getCurrentWeather(0,0))+".");
+
+                    watt.revalidate();
+                } catch(Exception a){
+                    now.setText("Error: "+a);
+                    watt.revalidate();
+                }
+            }
+        }); 
     } 
     public static int[] getForecast(double latitude, double longitude) throws Exception{
         String url = "https://api.open-meteo.com/v1/forecast" + "?latitude=" + latitude + "&longitude=" + longitude + "&daily=weather_code";
@@ -71,5 +96,18 @@ public class WATT{
         JsonObject current = root.getAsJsonObject("current");
         int code = current.get("weather_code").getAsInt();  
         return code;
+    }
+    public static String codetoweather(int code){
+        switch (code) {
+            case 0: return "sunny and clear skies";
+            case 1: return "mainly clear skies";
+            case 2: return "partly cloudy skies";
+            case 3: return "overcast skies";
+            case 45: 
+            case 48: return "fog";
+            case 51: return "light drizzle";
+            default: return "Error";
+        }
+ 
     }
 }

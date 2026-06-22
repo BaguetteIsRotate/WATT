@@ -15,6 +15,7 @@ import com.google.gson.*;
 public class WATT{
     public static void main(String[] args) throws Exception{
         //Make WATT window
+        double[] coordinates = getLocation();
         JFrame watt = new JFrame("Weather App of Terror and Trauma");
         watt.setLayout(new BorderLayout());
         watt.setSize(910,580);
@@ -27,7 +28,7 @@ public class WATT{
         JPanel topLeft= new JPanel(new BorderLayout());
         JLabel text = new JLabel("Box of Happiness");
         text.setHorizontalAlignment(JLabel.CENTER); 
-        String thing = box.generate(0,3);
+        String thing = box.generate(getCurrentWeather(coordinates[0], coordinates[1]));
         JLabel label= new JLabel(thing);
         label.setHorizontalAlignment(JLabel.CENTER); 
         topLeft.add(text,BorderLayout.NORTH);
@@ -40,7 +41,6 @@ public class WATT{
         //Add forecast
         watt.add(left,BorderLayout.WEST);
         JPanel right = new JPanel();
-        double[] coordinates = getLocation();
         int[] jeremy = getForecast(coordinates[0], coordinates[1]);
 
         DefaultListModel<String> model = new DefaultListModel<>();
@@ -48,14 +48,16 @@ public class WATT{
         for(int i=0; i<jeremy.length; i++){
             model.addElement(codetoweather(jeremy[i]));
         }
-        right.add(forecast,BorderLayout.SOUTH);
+        right.add(forecast,BorderLayout.NORTH);
         watt.add(right,BorderLayout.EAST);
-        JButton refresh_button = new JButton("refresh");
+        JButton refresh_button = new JButton("Refresh");
         ZonedDateTime dateandtime = ZonedDateTime.now();
 
         JLabel now = new JLabel("Today is "+dateandtime.format(DateTimeFormatter.ofPattern("M/d/uuuu"))+", and we currently have "+codetoweather(getCurrentWeather(coordinates[0], coordinates[1]))+".");
         right.add(refresh_button, BorderLayout.SOUTH);
-        right.add(now, BorderLayout.NORTH);
+        JPanel middle = new JPanel(new BorderLayout());
+        middle.add(now, BorderLayout.NORTH);
+        watt.add(middle, BorderLayout.CENTER);
         watt.setVisible(true);
         
         refresh_button.addActionListener(new ActionListener() {
@@ -65,6 +67,7 @@ public class WATT{
                     double[] coordinates = getLocation();
                     now.setText("Today is "+dateandtime.format(DateTimeFormatter.ofPattern("M/d/uuuu"))+", and we currently have "+codetoweather(getCurrentWeather(coordinates[0], coordinates[1]))+".");
                     model.clear();
+                    label.setText(box.generate(getCurrentWeather(coordinates[0], coordinates[1])));
                     int[] jeremy = getForecast(coordinates[0], coordinates[1]);
                     for(int i=0; i<jeremy.length; i++){
                         model.addElement(codetoweather(jeremy[i]));

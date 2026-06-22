@@ -1,3 +1,4 @@
 # WATT
 I will tell you the weather. 
-I will also CLIMB UP YOUR WALLS
+You will listen and thank me for the weather.
+Failure to do so will result in defenestration.
